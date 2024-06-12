@@ -5,6 +5,7 @@ import (
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/img"
 )
 
 func (g *game) drawLine(x1, y1, x2, y2 int) {
@@ -25,35 +26,70 @@ func (g *game) drawCircle(x, y, radius int) {
 	}
 }
 
+func (g *game) loadImage(filePath string) (*sdl.Texture, error) {
+	imgSurface, err := img.Load(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load image: %v", err)
+	}
+	defer imgSurface.Free()
+
+	texture, err := g.renderer.CreateTextureFromSurface(imgSurface)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create texture: %v", err)
+	}
+
+	return texture, nil
+}
+
 func (g *game) drawGrid(matrix [][]int) {
 	rows := len(matrix)
 	cols := len(matrix[0])
-
-	// Calculate the starting position to draw the matrix in the middle of the window
 	startX := (windowWidth - cols*cellSize) / 2
 	startY := (windowHeight - rows*cellSize) / 2
+	if g.initializing {
+		imagePath := "assets/PacMan.jpg"
+		imageTexture, err := g.loadImage(imagePath)
+		if err != nil {
+			fmt.Errorf("Failed to load image: %v\n", err)
+			return
+		}
 
-	for row := 0; row < rows; row++ {
-		for col := 0; col < cols; col++ {
-			x := startX + col*cellSize
-			y := startY + row*cellSize
-			if matrix[row][col] == 1 {
-				g.drawLine(x, y, x+cellSize, y)         
-				g.drawLine(x, y, x, y+cellSize)             
-				g.drawLine(x+cellSize, y, x+cellSize, y+cellSize) 
-				g.drawLine(x, y+cellSize, x+cellSize, y+cellSize) 			
-			} else if matrix[row][col] == 2 {
-				g.renderer.SetDrawColor(255, 25, 0, 25) 
-				g.drawCircle(x+cellSize/2, y+cellSize/2, circleRadius/2)
+		// Clear the renderer
+		g.renderer.Clear()
+
+		// Draw the image texture
+		g.renderer.Copy(imageTexture, nil, nil)
+
+		// Present the renderer
+		g.renderer.Present()
+
+		// Clean up
+		imageTexture.Destroy()
+	} else {
+		// Render the game grid as before
+
+		for row := 0; row < rows; row++ {
+			for col := 0; col < cols; col++ {
+				x := startX + col*cellSize
+				y := startY + row*cellSize
+				if matrix[row][col] == 1 {
+					g.drawLine(x, y, x+cellSize, y)
+					g.drawLine(x, y, x, y+cellSize)
+					g.drawLine(x+cellSize, y, x+cellSize, y+cellSize)
+					g.drawLine(x, y+cellSize, x+cellSize, y+cellSize)
+				} else if matrix[row][col] == 2 {
+					g.renderer.SetDrawColor(255, 25, 0, 25) 
+					g.drawCircle(x+cellSize/2, y+cellSize/2, circleRadius/2)
+				}
 			}
 		}
-	}
 
-	// Draw the player
-	playerX := startX + g.playerX * cellSize
-	playerY := startY + g.playerY * cellSize
-	g.renderer.SetDrawColor(255, 255, 0, 255) // Yellow color
-	g.drawCircle(playerX+cellSize/2, playerY+cellSize/2, circleRadius)
+		// Draw the player
+		playerX := startX + g.playerX * cellSize
+		playerY := startY + g.playerY * cellSize
+		g.renderer.SetDrawColor(255, 255, 0, 255) // Yellow color
+		g.drawCircle(playerX+cellSize/2, playerY+cellSize/2, circleRadius)
+	}
 }
 
 // Function to render text

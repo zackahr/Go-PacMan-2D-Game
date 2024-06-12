@@ -23,6 +23,7 @@ type game struct {
 	circleY      int
 	playerX      int
 	playerY      int
+	initializing bool
 }
 
 // Create a new game instance
@@ -34,7 +35,6 @@ func newGame() *game {
 	g.circleY = windowHeight / 2
 	g.playerX = 1
 	g.playerY = 1
-
 
 	return g
 }
@@ -70,6 +70,7 @@ func (g *game) close() {
 // Main game loop
 func (g *game) run(matrix [][]int) {
 	running := true
+	g.initializing = true
 	for running {
 		// Handle events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -77,6 +78,14 @@ func (g *game) run(matrix [][]int) {
 			case *sdl.QuitEvent:
 				running = false
 			case *sdl.KeyboardEvent:
+				if g.initializing && t.Type == sdl.KEYDOWN {
+					g.initializing = false
+				}
+				if !g.initializing {
+					if t.Keysym.Sym == sdl.K_ESCAPE {
+						running = false
+					}
+				}
 				if t.Keysym.Sym == sdl.K_ESCAPE {
 					running = false
 				}
