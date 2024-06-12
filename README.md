@@ -37,8 +37,8 @@ PacMan is a classic arcade game where the player navigates through a maze, attem
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/pacman-game.git
-   cd pacman-game
+   git clone https://github.com/zackahr/Go-PacMan-2D-Game.git
+   cd Go-PacMan-2D-Game
 2. Build and run the game:
    ```bash
    make run
