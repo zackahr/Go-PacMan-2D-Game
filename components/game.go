@@ -32,8 +32,8 @@ func newGame() *game {
 	g.textToRender = ""
 	g.circleX = windowWidth / 2
 	g.circleY = windowHeight / 2
-	g.playerX = 0
-	g.playerY = 0
+	g.playerX = 1
+	g.playerY = 1
 
 	return g
 }
@@ -67,9 +67,10 @@ func (g *game) close() {
 }
 
 // Main game loop
-func (g *game) run() {
+func (g *game) run(matrix [][]int) {
 	running := true
 	for running {
+		// Handle events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
@@ -81,37 +82,34 @@ func (g *game) run() {
 				if t.Type == sdl.KEYDOWN {
 					switch t.Keysym.Sym {
 					case sdl.K_w:
-						if g.playerY > 0 {
+						if g.playerY > 0 && matrix[g.playerY-1][g.playerX] != 1 {
 							g.playerY--
 						}
 					case sdl.K_a:
-						if g.playerX > 0 {
+						if g.playerX > 0 && matrix[g.playerY][g.playerX-1] != 1 {
 							g.playerX--
 						}
 					case sdl.K_s:
-						if g.playerY < len(matrix)-1 {
+						if g.playerY < len(matrix)-1 && matrix[g.playerY+1][g.playerX] != 1 {
 							g.playerY++
 						}
 					case sdl.K_d:
-						if g.playerX < len(matrix[0])-1 {
+						if g.playerX < len(matrix[0])-1 && matrix[g.playerY][g.playerX+1] != 1 {
 							g.playerX++
 						}
 					}
 				}
 			}
-			// Render the scene
-			g.renderer.SetDrawColor(0, 0, 0, 255)
-			g.renderer.Clear()
-
-			g.drawGrid(matrix2)
-
-			if g.textToRender != "" {
-				g.renderText(g.textToRender, g.fontSize, g.fontSize)
-			}
-
-			g.renderer.Present()
-
-			sdl.Delay(16)
 		}
+
+		// Render the scene
+		g.renderer.SetDrawColor(0, 0, 0, 255)
+		g.renderer.Clear()
+
+		g.drawGrid(matrix)
+
+		g.renderer.Present() // Present the renderer
+
+		sdl.Delay(16) // Delay to control frame rate
 	}
 }

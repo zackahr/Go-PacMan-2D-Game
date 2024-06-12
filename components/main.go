@@ -21,5 +21,5 @@ func main() {
 		return
 	}
 
-	g.run() // Run the game loop
+	g.run(matrix2)
 }
