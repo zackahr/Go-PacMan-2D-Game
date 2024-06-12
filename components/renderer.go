@@ -29,26 +29,32 @@ func (g *game) drawGrid(matrix [][]int) {
 	rows := len(matrix)
 	cols := len(matrix[0])
 
+	// Calculate the starting position to draw the matrix in the middle of the window
+	startX := (windowWidth - cols*cellSize) / 2
+	startY := (windowHeight - rows*cellSize) / 2
+
 	for row := 0; row < rows; row++ {
 		for col := 0; col < cols; col++ {
-			x := col * cellSize
-			y := row * cellSize
+			x := startX + col*cellSize
+			y := startY + row*cellSize
 			if matrix[row][col] == 1 {
 				g.drawLine(x, y, x+cellSize, y)         
 				g.drawLine(x, y, x, y+cellSize)             
 				g.drawLine(x+cellSize, y, x+cellSize, y+cellSize) 
 				g.drawLine(x, y+cellSize, x+cellSize, y+cellSize) 			
+			} else if matrix[row][col] == 2 {
+				g.renderer.SetDrawColor(255, 25, 0, 25) 
+				g.drawCircle(x+cellSize/2, y+cellSize/2, circleRadius/2)
 			}
 		}
 	}
 
 	// Draw the player
-	playerX := g.playerX * cellSize
-	playerY := g.playerY * cellSize
+	playerX := startX + g.playerX * cellSize
+	playerY := startY + g.playerY * cellSize
 	g.renderer.SetDrawColor(255, 255, 0, 255) // Yellow color
 	g.drawCircle(playerX+cellSize/2, playerY+cellSize/2, circleRadius)
 }
-
 
 // Function to render text
 func (g *game) renderText(text string, x, y int) error {

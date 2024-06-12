@@ -10,7 +10,7 @@ const (
 	windowWidth  = 800
 	windowHeight = 600
 	windowTitle  = "Game Window"
-	circleRadius = 3
+	circleRadius = 8
 	cellSize     = 20
 )
 
@@ -34,6 +34,7 @@ func newGame() *game {
 	g.circleY = windowHeight / 2
 	g.playerX = 1
 	g.playerY = 1
+
 
 	return g
 }
