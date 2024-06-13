@@ -20,7 +20,12 @@ PacMan is a classic arcade game where the player navigates through a maze, attem
 
 ### How to Play
 
-1. **Start the Game**: Upon starting the game, an image is displayed. Press any key to begin the game.
+![Screenshot from 2024-06-13 21-11-43](https://github.com/zackahr/Go-PacMan-2D-Game/assets/138884943/6ed78376-1fe0-4cef-a297-8a04765c6f03)
+
+1. **Start the Game**: Upon starting the game, an image is displayed. after 5s will disappear and show you 5 maps options.
+
+![Screenshot from 2024-06-13 21-12-01](https://github.com/zackahr/Go-PacMan-2D-Game/assets/138884943/c1742452-fab5-409b-803e-e0f2680ca847)
+
 2. **Control Pac-Man**: Use the `W`, `A`, `S`, and `D` keys to move Pac-Man up, left, down, and right, respectively.
 3. **Collect Items**: Navigate Pac-Man through the maze to collect all the collectibles while avoiding enemies.
 4. **Avoid Enemies**: If an enemy catches Pac-Man, the game is over.
