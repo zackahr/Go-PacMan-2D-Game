@@ -6,6 +6,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"github.com/veandco/go-sdl2/img"
+	"os"
 )
 
 func (g *game) drawLine(x1, y1, x2, y2 int) {
@@ -41,60 +42,114 @@ func (g *game) loadImage(filePath string) (*sdl.Texture, error) {
 	return texture, nil
 }
 
+func (g *game) renderInitializationImage() {
+	imagePath := "assets/PacMan.jpg"
+	imageTexture, err := g.loadImage(imagePath)
+	if err != nil {
+		fmt.Printf("Failed to load image: %v\n", err)
+		return
+	}
+
+	// Define the size and position of the image
+	destRect := sdl.Rect{
+		W: 160,  // Width of the image
+		H: 160,  // Height of the image
+		X: windowWidth/2 - 80,  // X position on the screen
+		Y: windowHeight/2 - 80,  // Y position on the screen
+	}
+
+	// Render the image
+	g.renderer.Clear()
+	g.renderer.Copy(imageTexture, nil, &destRect)
+
+	// Render text under the image
+	text := "Pac Man Gooo!!!!"
+
+	if err := g.renderText(text, windowWidth / 2 - 100, windowHeight / 2 + 100, 24); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to render text: %v\n", err)
+	}
+
+	// Present the renderer
+	g.renderer.Present()
+
+	// Clean up
+	imageTexture.Destroy()
+}
+
+func (g *game) renderGameGrid(matrix [][]int, startX, startY int) {
+	rows := len(matrix)
+	cols := len(matrix[0])
+
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			x := startX + col*cellSize
+			y := startY + row*cellSize
+			if matrix[row][col] == 1 {
+				g.drawLine(x, y, x+cellSize, y)
+				g.drawLine(x, y, x, y+cellSize)
+				g.drawLine(x+cellSize, y, x+cellSize, y+cellSize)
+				g.drawLine(x, y+cellSize, x+cellSize, y+cellSize)
+			} else if matrix[row][col] == 2 {
+				g.renderer.SetDrawColor(255, 25, 0, 255)
+				g.drawCircle(x+cellSize/2, y+cellSize/2, circleRadius/2)
+			}
+		}
+	}
+}
+
+
+func (g *game) initializePlayerPosition(matrix [][]int) {
+	for row := range matrix {
+		for col := range matrix[row] {
+			if matrix[row][col] == 'P' {
+				g.playerX = col
+				g.playerY = row
+				matrix[row][col] = 0 // Replace 'P' with 0 after setting the position
+				return
+			}
+		}
+	}
+}
+
+func (g *game) loadPlayerImage(filePath string) (*sdl.Texture, error) {
+	imgSurface, err := img.Load(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load image: %v", err)
+	}
+	defer imgSurface.Free()
+
+	texture, err := g.renderer.CreateTextureFromSurface(imgSurface)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create texture: %v", err)
+	}
+
+	return texture, nil
+}
+
+func (g *game) renderPlayer(startX, startY int) {
+	playerX := startX + g.playerX*cellSize
+	playerY := startY + g.playerY*cellSize
+	g.renderer.SetDrawColor(255, 255, 0, 255) // Yellow color
+	g.drawCircle(playerX+cellSize/2, playerY+cellSize/2, circleRadius)
+}
+
 func (g *game) drawGrid(matrix [][]int) {
 	rows := len(matrix)
 	cols := len(matrix[0])
 	startX := (windowWidth - cols*cellSize) / 2
 	startY := (windowHeight - rows*cellSize) / 2
+
 	if g.initializing {
-		imagePath := "assets/PacMan.jpg"
-		imageTexture, err := g.loadImage(imagePath)
-		if err != nil {
-			fmt.Errorf("Failed to load image: %v\n", err)
-			return
-		}
-
-		// Clear the renderer
-		g.renderer.Clear()
-
-		// Draw the image texture
-		g.renderer.Copy(imageTexture, nil, nil)
-
-		// Present the renderer
-		g.renderer.Present()
-
-		// Clean up
-		imageTexture.Destroy()
+		g.renderInitializationImage()
 	} else {
-		// Render the game grid as before
-
-		for row := 0; row < rows; row++ {
-			for col := 0; col < cols; col++ {
-				x := startX + col*cellSize
-				y := startY + row*cellSize
-				if matrix[row][col] == 1 {
-					g.drawLine(x, y, x+cellSize, y)
-					g.drawLine(x, y, x, y+cellSize)
-					g.drawLine(x+cellSize, y, x+cellSize, y+cellSize)
-					g.drawLine(x, y+cellSize, x+cellSize, y+cellSize)
-				} else if matrix[row][col] == 2 {
-					g.renderer.SetDrawColor(255, 25, 0, 25) 
-					g.drawCircle(x+cellSize/2, y+cellSize/2, circleRadius/2)
-				}
-			}
-		}
-
-		// Draw the player
-		playerX := startX + g.playerX * cellSize
-		playerY := startY + g.playerY * cellSize
-		g.renderer.SetDrawColor(255, 255, 0, 255) // Yellow color
-		g.drawCircle(playerX+cellSize/2, playerY+cellSize/2, circleRadius)
+		g.renderGameGrid(matrix, startX, startY)
+		g.renderPlayer(startX, startY)
 	}
 }
 
 // Function to render text
-func (g *game) renderText(text string, x, y int) error {
-	font, err := ttf.OpenFont("fonts/freesansbold.ttf", g.fontSize)
+func (g *game) renderText(text string, x, y, fontSize int) error {
+	font, err := ttf.OpenFont("fonts/freesansbold.ttf", fontSize)
 	if err != nil {
 		return fmt.Errorf("Failed to open font: %v", err)
 	}

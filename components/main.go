@@ -39,10 +39,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", err) // Print error to stderr
 		return
 	}
-	if err := g.renderInitialImage("assets/PacMan.jpg"); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to render initial image: %v\n", err)
-		return
-	}
 
-	g.run(matrix2)
+	g.run()
 }
